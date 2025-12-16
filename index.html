@@ -1,4 +1,17 @@
-<head>//<head>
+<head>/<head>
+    <title>Nap Store - Trang chủ</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script> 
+    
+    <script>
+        const firebaseConfig = { 
+          // * DÁN CHÍNH XÁC NỘI DUNG CỦA BẠN VÀO ĐÂY *
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore(); 
+    </script>
+</head>/<head>
     <title>Nap Store - Trang chủ</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -24,7 +37,46 @@ const firebaseConfig = {
   messagingSenderId: "353358010992",
   appId: "1:353358010992:web:8c5feeefa4a9304b68f2b5",
   measurementId: "G-M9X9LZXNRE"
-};<body>
+};<script>
+    function loadProducts() {
+        const productListDiv = document.getElementById("products-list");
+        productListDiv.innerHTML = "<h2>Đang tải sản phẩm từ Database...</h2>";
+
+        db.collection("products").get().then((querySnapshot) => {
+            productListDiv.innerHTML = "";
+
+            querySnapshot.forEach((doc) => {
+                const productData = doc.data(); 
+                const productHtml = `
+                    <div style="border: 1px solid #ddd; padding: 15px; width: 250px; text-align: center;">
+                        <img src="${productData.image}" alt="${productData.name}" style="width: 100%; height: auto; max-height: 150px; object-fit: cover; margin-bottom: 10px;">
+                        <h3>${productData.name}</h3>
+                        <p>${productData.desc}</p>
+                        <p style="font-weight: bold; color: red;">Giá: ${productData.price} VNĐ</p>
+                        <button style="padding: 8px 15px; background-color: #28a745; color: white; border: none; cursor: pointer;">
+                            Thêm vào Giỏ hàng
+                        </button>
+                    </div>
+                `;
+                productListDiv.innerHTML += productHtml;
+            });
+
+            if (querySnapshot.empty) {
+                productListDiv.innerHTML = "<h2>Hiện chưa có sản phẩm nào.</h2>";
+            }
+        })
+        .catch((error) => {
+            productListDiv.innerHTML = "<h2>Lỗi tải dữ liệu.</h2>";
+            console.error("Lỗi: ", error);
+        });
+    }
+    loadProducts(); 
+</script>
+</body>
+</html>
+<body><div id="products-list" style="display: flex; flex-wrap: wrap; gap: 20px; padding: 20px;">
+    Đang tải sản phẩm từ Database...
+</div>
     
     <div id="login-form" style="width: 300px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; text-align: center; display: none;">
         <h2>Đăng nhập Admin</h2>
