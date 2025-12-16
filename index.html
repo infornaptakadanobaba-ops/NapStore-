@@ -1,4 +1,21 @@
-<head>// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+<head>//<head>
+    <title>Nap Store - Trang chủ</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script> 
+    
+    <script>
+        // DÁN CHÍNH XÁC ĐOẠN MÃ const firebaseConfig = { ... }; CỦA BẠN VÀO ĐÂY
+        const firebaseConfig = { 
+          apiKey: "AIzaSy...", 
+          authDomain: "napstore-....firebaseapp.com",
+          projectId: "napstore-...",
+          // ...
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore(); // Khởi tạo Database
+    </script>
+</head> For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyCDVztWVVBhsp_vpUV5SWanRY7I65Mk4-s",
   authDomain: "napstore-47fdf.firebaseapp.com",
@@ -7,7 +24,115 @@ const firebaseConfig = {
   messagingSenderId: "353358010992",
   appId: "1:353358010992:web:8c5feeefa4a9304b68f2b5",
   measurementId: "G-M9X9LZXNRE"
-};
+};<body>
+    
+    <div id="login-form" style="width: 300px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; text-align: center; display: none;">
+        <h2>Đăng nhập Admin</h2>
+        Email: <input type="email" id="adminEmail" placeholder="Nhập Email Admin" style="margin-bottom: 10px; padding: 8px;"><br>
+        Mật khẩu: <input type="password" id="adminPassword" placeholder="Nhập Mật khẩu" style="margin-bottom: 20px; padding: 8px;"><br>
+        <button onclick="loginAdmin()" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer;">
+            Đăng Nhập
+        </button>
+    </div>
+
+    <div id="product-management" style="display: none; padding: 20px;">
+        
+        <h1 style="border-bottom: 2px solid #ccc; padding-bottom: 10px;">Quản lý Sản phẩm (Nap Store)</h1>
+        <button onclick="logoutAdmin()" style="float: right; padding: 5px 10px; background-color: #dc3545; color: white; border: none; cursor: pointer;">
+            Đăng Xuất
+        </button>
+
+        <div style="width: 500px; padding: 20px; border: 1px solid #007bff; margin-top: 10px;">
+            <h2>Thêm Sản Phẩm Mới</h2>
+            <label for="productName">Tên sản phẩm:</label><br>
+            <input type="text" id="productName" style="width: 100%; margin-bottom: 10px;"><br>
+            <label for="productPrice">Giá (ví dụ: 15000000):</label><br>
+            <input type="number" id="productPrice" style="width: 100%; margin-bottom: 10px;"><br>
+            <label for="productDesc">Mô tả:</label><br>
+            <textarea id="productDesc" style="width: 100%; margin-bottom: 10px;"></textarea><br>
+            <label for="productImage">URL/Tên File Ảnh:</label><br>
+            <input type="text" id="productImage" style="width: 100%; margin-bottom: 20px;"><br>
+            
+            <button onclick="addProduct()" style="padding: 10px 20px; background-color: green; color: white; border: none; cursor: pointer;">
+                Thêm Sản Phẩm vào Database
+            </button>
+        </div>
+        
+    </div>
+
+    <script>
+        // Hàm xử lý ĐĂNG NHẬP
+        function loginAdmin() {
+            const email = document.getElementById("adminEmail").value;
+            const password = document.getElementById("adminPassword").value;
+            
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    alert("Đăng nhập thành công!");
+                })
+                .catch((error) => {
+                    alert("Đăng nhập thất bại: " + error.message);
+                });
+        }
+
+        // Hàm xử lý ĐĂNG XUẤT
+        function logoutAdmin() {
+            firebase.auth().signOut().then(() => {
+                alert("Đã đăng xuất thành công.");
+            }).catch((error) => {
+                console.error("Lỗi đăng xuất: ", error);
+            });
+        }
+
+        // HÀM KIỂM TRA TRẠNG THÁI ĐĂNG NHẬP (Quản lý việc ẩn/hiện form)
+        firebase.auth().onAuthStateChanged((user) => {
+            const loginForm = document.getElementById("login-form");
+            const productManagement = document.getElementById("product-management");
+            
+            if (user) {
+                // Đã đăng nhập
+                loginForm.style.display = 'none';
+                productManagement.style.display = 'block';
+            } else {
+                // Chưa đăng nhập
+                loginForm.style.display = 'block';
+                productManagement.style.display = 'none';
+            }
+        });
+
+        // Hàm THÊM SẢN PHẨM 
+        function addProduct() {
+            const name = document.getElementById("productName").value;
+            const price = document.getElementById("productPrice").value; 
+            const desc = document.getElementById("productDesc").value;
+            const image = document.getElementById("productImage").value;
+            
+            if (!name || !price || !desc) {
+                alert("Vui lòng nhập đủ Tên, Giá và Mô tả.");
+                return; 
+            }
+
+            db.collection("products").add({
+                name: name,
+                price: price, 
+                desc: desc,
+                image: image,
+            })
+            .then((docRef) => {
+                alert("✅ Đã thêm sản phẩm thành công!");
+                // Xóa form sau khi thêm thành công
+                document.getElementById("productName").value = '';
+                document.getElementById("productPrice").value = '';
+                document.getElementById("productDesc").value = '';
+                document.getElementById("productImage").value = '';
+            })
+            .catch((error) => {
+                alert("❌ Lỗi khi thêm. Vui lòng đăng nhập lại.");
+                console.error("Lỗi: ", error);
+            });
+        }
+    </script>
+</body>
     <title>Nap Store - Trang chủ</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
